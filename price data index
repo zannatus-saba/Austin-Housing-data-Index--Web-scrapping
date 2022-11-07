@@ -1,0 +1,88 @@
+
+import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait as wait
+from selenium.webdriver.support import expected_conditions as EC
+import time  
+from selenium.webdriver.edge.service import Service
+
+from datetime import datetime
+from matplotlib import pyplot as plt, dates as mdates
+
+
+driver = webdriver.Edge(executable_path=r'C:\Users\zanna\OneDrive\Documents\MSIS\edgedriver_win32\msedgedriver.exe')
+
+housingIndex_url = 'https://www.recenter.tamu.edu/data/home-price-index/#!/MSA/Austin-Round_Rock'
+driver.get(housingIndex_url)
+
+Index1=driver.find_elements(By.CSS_SELECTOR, 'tr.ng-scope>td.ng-binding:nth-child(1)')
+Index1[0].text
+temp_list8=[]
+for i in Index1:
+    temp_list8.append(i.text)
+    
+df22 = pd.DataFrame(temp_list8) 
+df22=df22.drop(df22.index[0:64])
+df22.columns=['Quarters']
+print(df22)
+
+
+Index2=driver.find_elements(By.CSS_SELECTOR, 'tr.ng-scope>td.ng-binding:nth-child(2)')
+Index2[0].text
+temp_list9=[]
+for i in Index2:
+    temp_list9.append(i.text)
+    
+df21 = pd.DataFrame(temp_list9) 
+df21=df21.drop(df21.index[0:64])
+df21.columns=['Index Price']
+print(df21)
+
+extracted=df22["Quarters"]
+df21 = df21.join(extracted)
+df21.set_index('Quarters')
+#result2 = pd.concat([df21], axis=1, join='inner')
+#result2.columns =['Quarter', 'Index']
+
+
+import os
+os.chdir('C:/Users/zanna/OneDrive/Documents/MSIS-5193/tweeter')
+directory= 'C:/Users/zanna/OneDrive/Documents/MSIS-5193/tweeter'
+
+####Saving file as "austindata.csv"
+
+df21.to_csv(r'C:\Users\zanna\OneDrive\Documents\MSIS\twitter\austinindexdata.csv')
+os.chdir('C:/Users/zanna/OneDrive/Documents/MSIS/twitter')
+directory= 'C:/Users/zanna/OneDrive/Documents/MSIS/twitter'
+
+data2 = pd.read_csv("austinindexdata.csv")
+date_time = data2.Quarters
+data2 = data2.set_index(date_time)
+data2.drop(['Quarters'], axis=1)
+data = data2['Index Price']
+DF = pd.DataFrame()
+DF['value'] = data
+DF = DF.set_index(date_time)
+plt.plot(DF)
+figsize=(20,20)
+plt.xticks(rotation=90)
+plt.title('Housing price index')
+plt.xlabel('Quarter')
+plt.ylabel('Index')
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
